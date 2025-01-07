@@ -33,12 +33,19 @@ function getNumberOfWords(filePath) {
 	return match.length;
 }
 
-function main() {
-	const [_1, _2, option, filePath] = process.argv;
-	if (!option) throw new Error("Option is required!!");
-	if (!filePath) throw new Error("Filepath is required!!");
+function getNumberOfChars(filePath) {
+	const content = fs.readFileSync(filePath, { encoding: "utf-8" });
 
-	switch (option) {
+	if (!content.trim()) return 0;
+
+	return content.length;
+}
+
+function main() {
+	const [_1, _2, optionOrFilePath, filePath] = process.argv;
+	if (!optionOrFilePath) throw new Error("Option is required!!");
+
+	switch (optionOrFilePath) {
 		case "-c":
 			console.log(getFileBytes(filePath), filePath);
 			break;
@@ -48,8 +55,16 @@ function main() {
 		case "-w":
 			console.log(getNumberOfWords(filePath), filePath);
 			break;
+		case "-m":
+			console.log(getNumberOfChars(filePath), filePath);
+			break;
 		default:
-			throw new Error("Invalid option!!");
+			console.log(
+				getNumberOfLinesFromFile(optionOrFilePath),
+				getNumberOfWords(optionOrFilePath),
+				getFileBytes(optionOrFilePath),
+				optionOrFilePath
+			);
 	}
 }
 
