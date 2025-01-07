@@ -1,7 +1,7 @@
 const fs = require("fs");
 
-function getFileBytes(filePath) {
-	const buffer = fs.readFileSync(filePath);
+function getFileBytes(content) {
+	const buffer = Buffer.from(content);
 
 	return buffer.length;
 }
@@ -17,14 +17,11 @@ function getNumberOfLines(content) {
 	return 1;
 }
 
-function getNumberOfLinesFromFile(filePath) {
-	const content = fs.readFileSync(filePath, { encoding: "utf-8" });
+function getNumberOfLinesFromFile(content) {
 	return getNumberOfLines(content);
 }
 
-function getNumberOfWords(filePath) {
-	const content = fs.readFileSync(filePath, { encoding: "utf-8" });
-
+function getNumberOfWords(content) {
 	if (!content.trim()) return 0;
 	const pattern = /\s+/;
 
@@ -33,37 +30,54 @@ function getNumberOfWords(filePath) {
 	return match.length;
 }
 
-function getNumberOfChars(filePath) {
-	const content = fs.readFileSync(filePath, { encoding: "utf-8" });
-
+function getNumberOfChars(content) {
 	if (!content.trim()) return 0;
 
 	return content.length;
 }
 
 function main() {
-	const [_1, _2, optionOrFilePath, filePath] = process.argv;
+	let options = ["-c", "-l", "-w", "-m"];
+	let [_1, _2, optionOrFilePath, filePath] = process.argv;
 	if (!optionOrFilePath) throw new Error("Option is required!!");
+
+	let content;
+	if (!filePath && !options.includes(optionOrFilePath)) {
+		filePath = optionOrFilePath;
+	} else {
+		const stdin = process.stdin;
+
+		stdin.setEncoding("utf-8");
+		stdin.on("data", (data) => {
+			content = data;
+			console.log(data);
+		});
+	}
+
+	if (!content && filePath) {
+		content = fs.readFileSync(filePath, { encoding: "utf-8" });
+	} else {
+	}
 
 	switch (optionOrFilePath) {
 		case "-c":
-			console.log(getFileBytes(filePath), filePath);
+			console.log(getFileBytes(content), filePath);
 			break;
 		case "-l":
-			console.log(getNumberOfLinesFromFile(filePath), filePath);
+			console.log(getNumberOfLinesFromFile(content), filePath);
 			break;
 		case "-w":
-			console.log(getNumberOfWords(filePath), filePath);
+			console.log(getNumberOfWords(content), filePath);
 			break;
 		case "-m":
-			console.log(getNumberOfChars(filePath), filePath);
+			console.log(getNumberOfChars(content), filePath);
 			break;
 		default:
 			console.log(
-				getNumberOfLinesFromFile(optionOrFilePath),
-				getNumberOfWords(optionOrFilePath),
-				getFileBytes(optionOrFilePath),
-				optionOrFilePath
+				getNumberOfLinesFromFile(content),
+				getNumberOfWords(content),
+				getFileBytes(content),
+				filePath
 			);
 	}
 }
