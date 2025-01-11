@@ -39,27 +39,33 @@ function getNumberOfChars(content) {
 function main() {
 	let options = ["-c", "-l", "-w", "-m"];
 	let [_1, _2, optionOrFilePath, filePath] = process.argv;
-	if (!optionOrFilePath) throw new Error("Option is required!!");
 
 	let content;
 	if (!filePath && !options.includes(optionOrFilePath)) {
 		filePath = optionOrFilePath;
-	} else {
-		const stdin = process.stdin;
-
-		stdin.setEncoding("utf-8");
-		stdin.on("data", (data) => {
-			content = data;
-			console.log(data);
-		});
 	}
+
+	const stdin = process.stdin;
+
+	stdin.setEncoding("utf-8");
+	stdin.on("data", (data) => {
+		content += data;
+	});
+	stdin.on("end", () => {
+		precessFile(optionOrFilePath, content, "");
+	});
 
 	if (!content && filePath) {
 		content = fs.readFileSync(filePath, { encoding: "utf-8" });
-	} else {
 	}
 
-	switch (optionOrFilePath) {
+	if (content) {
+		precessFile(optionOrFilePath, content, filePath);
+	}
+}
+
+function precessFile(option, content, filePath) {
+	switch (option) {
 		case "-c":
 			console.log(getFileBytes(content), filePath);
 			break;
@@ -80,6 +86,7 @@ function main() {
 				filePath
 			);
 	}
+	process.exit(0);
 }
 
 main();
