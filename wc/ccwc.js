@@ -45,6 +45,15 @@ function main() {
 		filePath = optionOrFilePath;
 	}
 
+	if (!content && filePath) {
+		content = fs.readFileSync(filePath, { encoding: "utf-8" });
+	}
+
+	if (content) {
+		precessFile(optionOrFilePath, content, filePath);
+		return;
+	}
+
 	const stdin = process.stdin;
 
 	stdin.setEncoding("utf-8");
@@ -54,14 +63,6 @@ function main() {
 	stdin.on("end", () => {
 		precessFile(optionOrFilePath, content, "");
 	});
-
-	if (!content && filePath) {
-		content = fs.readFileSync(filePath, { encoding: "utf-8" });
-	}
-
-	if (content) {
-		precessFile(optionOrFilePath, content, filePath);
-	}
 }
 
 function precessFile(option, content, filePath) {
